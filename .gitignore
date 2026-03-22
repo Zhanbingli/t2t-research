@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.env
+
+# Data (large files — keep raw & generated data local)
+data/raw/
+data/notes/
+data/extracted/
+data/noisy/
+
+# Results & figures (regeneratable)
+results/
+figures/
+
+# uv
+.python-version
+
+# macOS
+.DS_Store
