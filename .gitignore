@@ -14,6 +14,7 @@ data/noisy/
 # Results & figures (regeneratable)
 results/
 figures/
+!docs/figures/
 
 # uv
 .python-version

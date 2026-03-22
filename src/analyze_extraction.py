@@ -7,6 +7,7 @@ Usage:
     uv run python src/analyze_extraction.py
 """
 
+import argparse
 import json
 from pathlib import Path
 
@@ -14,13 +15,18 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_error, precision_score, recall_score, f1_score
 
-EXTR_PATH = Path("data/extracted/extracted_structured.jsonl")
-FIG_DIR   = Path("figures")
-RES_DIR   = Path("results")
-FIG_DIR.mkdir(exist_ok=True)
-RES_DIR.mkdir(exist_ok=True)
+parser = argparse.ArgumentParser()
+parser.add_argument("--model", default="deepseek",
+                    help="Extractor key, e.g. deepseek / qwen2b / qwen9b")
+_args = parser.parse_args()
+
+EXTR_PATH = Path(f"data/extracted/{_args.model}/extracted_structured.jsonl")
+FIG_DIR   = Path(f"figures/{_args.model}")
+RES_DIR   = Path(f"results/{_args.model}")
+FIG_DIR.mkdir(parents=True, exist_ok=True)
+RES_DIR.mkdir(parents=True, exist_ok=True)
 
 FIELDS = ["age","sex","cp","trestbps","chol","fbs",
           "restecg","thalach","exang","oldpeak","slope"]
@@ -60,13 +66,19 @@ def field_accuracy(df: pd.DataFrame) -> pd.DataFrame:
         n    = mask.sum()
 
         if field in CATEGORICAL:
-            correct = ((pred[mask].astype(float).round() ==
-                        gt[mask].astype(float)).sum())
-            acc = correct / n if n else 0
+            y_true = gt[mask].astype(float).round().astype(int)
+            y_pred = pred[mask].astype(float).round().astype(int)
+            acc = (y_true == y_pred).mean()
+            avg = "binary" if y_true.nunique() <= 2 else "macro"
+            prec = precision_score(y_true, y_pred, average=avg, zero_division=0)
+            rec  = recall_score(y_true, y_pred, average=avg, zero_division=0)
+            f1   = f1_score(y_true, y_pred, average=avg, zero_division=0)
             stats.append({
                 "field": field, "type": "categorical",
                 "n": n, "accuracy": round(acc, 3),
-                "mae": None, "extraction_rate": round(n / len(df), 3),
+                "precision": round(prec, 3), "recall": round(rec, 3),
+                "f1": round(f1, 3), "mae": None,
+                "extraction_rate": round(n / len(df), 3),
             })
         else:
             mae = mean_absolute_error(gt[mask].astype(float),
@@ -77,6 +89,7 @@ def field_accuracy(df: pd.DataFrame) -> pd.DataFrame:
             stats.append({
                 "field": field, "type": "continuous",
                 "n": n, "accuracy": round(acc, 3),
+                "precision": None, "recall": None, "f1": None,
                 "mae": round(mae, 2) if mae else None,
                 "extraction_rate": round(n / len(df), 3),
             })
@@ -90,8 +103,8 @@ def calibration_analysis(df: pd.DataFrame) -> pd.DataFrame:
     For each confidence bucket, compute actual accuracy.
     Returns a DataFrame used to plot the calibration curve.
     """
-    bins = [0, 20, 40, 60, 80, 100]
-    labels = ["0-20", "20-40", "40-60", "60-80", "80-100"]
+    bins = [0, 20, 40, 60, 70, 80, 90, 100]
+    labels = ["0-20", "20-40", "40-60", "60-70", "70-80", "80-90", "90-100"]
     rows = []
 
     for field in FIELDS:

@@ -11,15 +11,38 @@ generation:
   retry_wait_seconds: 2
 
 extraction:
-  provider: deepseek
-  base_url: "https://api.deepseek.com/v1"
-  api_key_env: DEEPSEEK_API_KEY
-  model: deepseek-chat
-  max_tokens: 800
-  temperature: 0.0            # deterministic for extraction
-  concurrency: 5
-  retry_attempts: 3
-  retry_wait_seconds: 2
+  deepseek:
+    provider: deepseek
+    base_url: "https://api.deepseek.com/v1"
+    api_key_env: DEEPSEEK_API_KEY
+    model: deepseek-chat
+    max_tokens: 800
+    temperature: 0.0
+    concurrency: 5
+    retry_attempts: 3
+    retry_wait_seconds: 2
+
+  qwen9b:
+    provider: ollama
+    base_url: "http://localhost:11434"
+    model: qwen3.5:9b
+    think: false
+    max_tokens: 800
+    temperature: 0.0
+    concurrency: 2
+    retry_attempts: 3
+    retry_wait_seconds: 3
+
+  qwen2b:
+    provider: ollama
+    base_url: "http://localhost:11434"
+    model: qwen3.5:2b
+    think: false
+    max_tokens: 500                      # JSON output ~300-400 tokens, no need for 800
+    temperature: 0.0
+    concurrency: 2                       # matches OLLAMA_NUM_PARALLEL=2
+    retry_attempts: 3
+    retry_wait_seconds: 2
 
 paths:
   raw_data: data/raw/heart_918.csv

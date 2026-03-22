@@ -16,9 +16,15 @@ import numpy as np
 import pandas as pd
 import yaml
 
+import argparse as _ap
+_noise_parser = _ap.ArgumentParser()
+_noise_parser.add_argument("--model", default="deepseek",
+                            help="Extractor key, e.g. deepseek / qwen2b / qwen9b")
+_noise_args, _ = _noise_parser.parse_known_args()
+
 CFG_PATH   = Path("config/api_config.yaml")
-EXTR_PATH  = Path("data/extracted/extracted_structured.jsonl")
-OUT_DIR    = Path("data/noisy")
+EXTR_PATH  = Path(f"data/extracted/{_noise_args.model}/extracted_structured.jsonl")
+OUT_DIR    = Path(f"data/noisy/{_noise_args.model}")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 with open(CFG_PATH) as f:
