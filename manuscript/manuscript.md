@@ -1,9 +1,9 @@
 # Error Propagation in LLM-Mediated Clinical Data Pipelines: A Table-to-Text-to-Table Fault-Tolerance Study
 
-**Author:** [Your Name]
-**Affiliation:** [Your Medical School / University], [City], China
-**Corresponding author:** [your email]
-**ORCID:** [register at orcid.org — free, takes 2 minutes]
+**Author:** Zhanbing Li
+**Affiliation:** Kunming Medical University, Kunming, China
+**Corresponding author:** zhanbing2025@gmail.com
+**ORCID:** 0009-0003-6067-2183
 
 **Competing interests:** None declared.
 **Funding:** None.
