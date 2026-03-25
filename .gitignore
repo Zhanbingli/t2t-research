@@ -11,10 +11,12 @@ data/notes/
 data/extracted/
 data/noisy/
 
-# Results & figures (regeneratable)
-results/
-figures/
-!docs/figures/
+# PDF figures (only keep PNG for GitHub)
+*.pdf
+
+# Local symlinks
+prior_figures
+prior_results
 
 # uv
 .python-version

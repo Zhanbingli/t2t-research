@@ -1,6 +1,11 @@
 # T2T: Evaluating LLM Extraction Error Propagation in Clinical Prediction Pipelines
 
-> **Table → Text → Table** — How faithfully can LLMs reconstruct structured clinical data from free-text notes, and what happens to downstream prediction when they fail?
+> **Table-to-Text-to-Table** — How faithfully can LLMs reconstruct structured clinical data from free-text notes, and what happens to downstream prediction when they fail?
+
+This repository contains the code, data, and figures for the paper:
+
+**"Error Propagation in LLM-Mediated Clinical Data Pipelines: A Table-to-Text-to-Table Fault-Tolerance Study"**
+*Zhanbing Li, Kunming Medical University*
 
 ---
 
@@ -20,20 +25,20 @@ This project studies the **T2T (Table-to-Text-to-Table) pipeline**: structured c
 
 ```
 UCI Heart Disease (918 samples)
-         │
-         ▼
-  [DeepSeek API] ──► Clinical Notes (free text)
-         │
-         ├──► [DeepSeek] ──► Extracted structured fields
-         └──► [Qwen3.5-2B (local)] ──► Extracted structured fields
-                    │
-                    ▼
-         Noise injection (5 levels × 2 strategies)
-                    │
-                    ▼
+         |
+         v
+  [DeepSeek API] --> Clinical Notes (free text)
+         |
+         |---> [DeepSeek] --> Extracted structured fields
+         '---> [Qwen3.5-2B (local)] --> Extracted structured fields
+                    |
+                    v
+         Noise injection (5 levels x 2 strategies)
+                    |
+                    v
          Downstream ML: XGBoost / LogReg / MLP
-                    │
-                    ▼
+                    |
+                    v
          AUC-ROC evaluation (5-fold CV)
 ```
 
@@ -67,7 +72,7 @@ DeepSeek achieves near-perfect extraction across all 11 clinical fields. Qwen3.5
 
 LLM self-reported confidence scores reveal a stark contrast in **metacognitive ability**:
 
-- **DeepSeek ECE = 0.009** — near-perfect calibration (high confidence → high accuracy)
+- **DeepSeek ECE = 0.009** — near-perfect calibration (high confidence = high accuracy)
 - **Qwen3.5-2B ECE = 0.070** — severely overconfident; reports 100% confidence even when accuracy is only 42.6%
 
 ![Calibration curve](docs/figures/fig_calibration_curve.png)
@@ -78,7 +83,7 @@ LLM self-reported confidence scores reveal a stark contrast in **metacognitive a
 
 ### 3. Chest Pain Type — Systematic Errors in Qwen3.5-2B
 
-Qwen3.5-2B does not simply make random errors. For `cp`, it generates **183 predictions of value `0`** — a value that does not exist in the dataset's valid range (1–4). This reveals systematic hallucination rather than random noise.
+Qwen3.5-2B does not simply make random errors. For `cp`, it generates **183 predictions of value `0`** — a value that does not exist in the dataset's valid range (1-4). This reveals systematic hallucination rather than random noise.
 
 ![cp confusion matrix](docs/figures/fig_cp_confusion.png)
 
@@ -106,7 +111,7 @@ Notably, **DeepSeek extracted data slightly outperforms ground truth** (0.934 vs
 
 ### 5. Feature Importance vs. Extraction Error
 
-A key finding: **extraction error rate is uncorrelated with XGBoost feature importance** (Pearson r ≈ 0.03 for both models). This explains why high extraction error on `cp` causes only minor AUC degradation — the impact of extraction errors depends on the predictive contribution of the corrupted field, not the error rate alone.
+A key finding: **extraction error rate is uncorrelated with XGBoost feature importance** (Pearson r = 0.03 for both models). This explains why high extraction error on `cp` causes only minor AUC degradation — the impact depends on the predictive contribution of the corrupted field, not the error rate alone.
 
 ---
 
@@ -114,11 +119,11 @@ A key finding: **extraction error rate is uncorrelated with XGBoost feature impo
 
 All three classifiers maintain reasonable AUC even under 30% random field corruption. XGBoost is consistently the most robust.
 
-| Model | DeepSeek AUC drop (0%→30%) | Qwen2b AUC drop (0%→30%) |
+| Model | DeepSeek AUC drop (0%->30%) | Qwen2b AUC drop (0%->30%) |
 |-------|:--------------------------:|:------------------------:|
-| XGBoost | −0.060 | −0.037 |
-| LogReg | −0.056 | −0.047 |
-| MLP | −0.063 | −0.032 |
+| XGBoost | -0.060 | -0.037 |
+| LogReg | -0.056 | -0.047 |
+| MLP | -0.063 | -0.032 |
 
 ![Noise resilience](docs/figures/fig_noise_resilience.png)
 
@@ -128,23 +133,36 @@ All three classifiers maintain reasonable AUC even under 30% random field corrup
 
 ```
 research_pt/
+├── manuscript/
+│   └── manuscript.md              # Full manuscript (medRxiv format)
 ├── config/
-│   └── api_config.yaml          # API keys, model configs, noise parameters
+│   └── api_config.yaml            # Model configs, noise parameters
 ├── prompts/
-│   ├── generation_prompt.txt    # Clinical note generation prompt
-│   └── extraction_prompt.txt    # Structured extraction prompt (JSON schema)
+│   ├── generation_prompt.txt      # Clinical note generation prompt
+│   └── extraction_prompt.txt      # Structured extraction prompt (JSON schema)
 ├── src/
-│   ├── prepare_data.py          # Day 1: UCI data preprocessing
-│   ├── generate_notes.py        # Day 3: LLM clinical note generation
-│   ├── extract_structured.py    # Day 5: Multi-model structured extraction
-│   ├── analyze_extraction.py    # Day 6: Per-field accuracy & calibration
-│   ├── noise_injection.py       # Day 7: Gradient noise injection
-│   ├── train_evaluate.py        # Day 8–9: ML training & evaluation
-│   └── advanced_analysis.py     # Statistical tests, ECE, comparison figures
-├── docs/
-│   └── figures/                 # Key figures for this README
-└── data/                        # Excluded from git (regeneratable)
+│   ├── prepare_data.py            # UCI data preprocessing
+│   ├── generate_notes.py          # LLM clinical note generation
+│   ├── extract_structured.py      # Multi-model structured extraction
+│   ├── analyze_extraction.py      # Per-field accuracy & calibration analysis
+│   ├── noise_injection.py         # Gradient noise injection
+│   ├── train_evaluate.py          # ML training & evaluation
+│   └── advanced_analysis.py       # Statistical tests, ECE, comparison figures
+├── results/                       # Experiment result CSVs
+│   ├── deepseek/                  # DeepSeek extraction results
+│   ├── qwen2b/                    # Qwen3.5-2B extraction results
+│   └── comparison/                # Cross-model comparison data
+├── figures/                       # All generated figures (PNG + PDF)
+│   ├── deepseek/
+│   ├── qwen2b/
+│   └── comparison/
+├── docs/figures/                  # Key figures for this README
+├── data/
+│   └── processed/                 # Preprocessed dataset (included)
+└── pyproject.toml                 # Python dependencies
 ```
+
+> **Note:** Raw data, generated clinical notes, extracted JSON, and noisy datasets are excluded from this repository as they are large and fully regeneratable from the pipeline. The preprocessed dataset (`data/processed/heart_processed.csv`) is included.
 
 ---
 
@@ -165,7 +183,7 @@ uv run python src/generate_notes.py
 
 # Step 3: Extract structured fields
 uv run python src/extract_structured.py --model deepseek
-uv run python src/extract_structured.py --model qwen2b   # requires Ollama
+uv run python src/extract_structured.py --model qwen2b   # requires Ollama with qwen3.5:2b
 
 # Step 4: Analyze extraction quality
 uv run python src/analyze_extraction.py --model deepseek
@@ -204,4 +222,21 @@ Features: age, sex, chest pain type (cp), resting blood pressure (trestbps), cho
 - Clinical notes are LLM-generated (synthetic), not from real EHR systems
 - Single dataset; generalizability to other clinical domains is not yet validated
 - Statistical comparisons are underpowered with 5-fold CV (n=5 paired observations)
-- Local model tested at 2B parameters only; mid-scale (7–9B) results pending
+- Local model tested at 2B parameters only; mid-scale (7-9B) results pending
+
+---
+
+## Citation
+
+If you use this code or find our results useful, please cite:
+
+```
+Li, Z. (2026). Error Propagation in LLM-Mediated Clinical Data Pipelines:
+A Table-to-Text-to-Table Fault-Tolerance Study. medRxiv preprint.
+```
+
+---
+
+## License
+
+This project is released under the [MIT License](LICENSE).

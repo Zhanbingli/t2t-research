@@ -1,0 +1,4 @@
+model,auc_gt,auc_extracted,auc_drop,ci_95_lo,ci_95_hi,t_stat,p_value,significant
+deepseek,0.924,0.9341,-0.0102,-0.0194,-0.001,-2.165,0.0964,False
+qwen2b,0.924,0.9151,0.0089,-0.0184,0.0361,0.636,0.5591,False
+deepseek_vs_qwen2b,0.9341,0.9151,0.019,,,1.33,0.22,False

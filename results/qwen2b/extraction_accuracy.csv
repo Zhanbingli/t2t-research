@@ -1,0 +1,12 @@
+field,type,n,accuracy,precision,recall,f1,mae,extraction_rate
+age,continuous,918,1.0,,,,,1.0
+sex,categorical,918,0.79,0.79,1.0,0.883,,1.0
+cp,categorical,807,0.426,0.401,0.449,0.328,,0.879
+trestbps,continuous,917,1.0,,,,,0.999
+chol,continuous,833,0.999,,,,0.36,0.907
+fbs,categorical,918,0.998,0.991,1.0,0.995,,1.0
+restecg,categorical,918,0.987,0.982,0.98,0.98,,1.0
+thalach,continuous,898,1.0,,,,,0.978
+exang,categorical,918,0.997,0.992,1.0,0.996,,1.0
+oldpeak,continuous,909,0.991,,,,0.02,0.99
+slope,categorical,865,0.997,0.997,0.998,0.998,,0.942
